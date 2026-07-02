@@ -1,0 +1,47 @@
+# 测试环境配置
+server:
+  port: 8081
+
+spring:
+  # 数据源配置（敏感信息使用环境变量）
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:test-db}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:food_inventory_test}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USERNAME:test_user}
+    password: ENC(${MYSQL_PASSWORD_ENCRYPTED:})
+    hikari:
+      minimum-idle: 10
+      maximum-pool-size: 30
+      idle-timeout: 60000
+      pool-name: FoodInventoryTestHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  # Redis 配置
+  data:
+    redis:
+      host: ${REDIS_HOST:test-redis}
+      port: ${REDIS_PORT:6379}
+      password: ENC(${REDIS_PASSWORD_ENCRYPTED:})
+      database: 1
+      timeout: 10000ms
+
+  # Jasypt 配置加密
+  jasypt:
+    encryptor:
+      password: ${JASYPT_PASSWORD:}
+
+# Knife4j 接口文档（测试环境启用）
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
+# 日志配置（测试环境标准日志）
+logging:
+  level:
+    root: INFO
+    com.food: INFO
+    com.food.mapper: INFO
+  file:
+    name: logs/food-inventory-test.log

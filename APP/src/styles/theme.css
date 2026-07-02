@@ -1,0 +1,327 @@
+/**
+ * 食库管家 - 暖意厨房（Warm Kitchen）主题
+ * 低饱和、自然和谐的「食物 / 食谱 / 冰箱」主题色系
+ * 在 vant/lib/index.css 之后引入以覆写 Vant 主题变量
+ */
+
+:root {
+  /* ===== 主题色板 ===== */
+  --sk-bg: #faf6ef;            /* 页面暖奶油底 */
+  --sk-card: #fffefb;          /* 卡片暖白底 */
+  --sk-section: #f5efe4;       /* 次级区块底 */
+  --sk-primary: #7c9473;       /* 鼠尾草绿（食物/新鲜） */
+  --sk-primary-dark: #5e7a56;  /* 主色深 */
+  --sk-primary-bg: #edf1e8;    /* 主色浅底 */
+  --sk-accent: #c97b5c;        /* 赤陶橙（烹饪/食谱） */
+  --sk-accent-bg: #f7e8df;     /* 暖点缀浅底 */
+  --sk-cold: #6e8ca8;          /* 雾霾蓝（冰箱/冷冻） */
+  --sk-cold-bg: #e8eef4;       /* 冷点缀浅底 */
+  --sk-text: #3d352e;          /* 正文暖深棕 */
+  --sk-text-2: #8b7e6f;        /* 次文暖灰棕 */
+  --sk-text-3: #b5a99a;        /* 占位浅暖灰 */
+  --sk-border: #ece4d6;        /* 暖色描边 */
+
+  /* ===== 临期预警色 ===== */
+  --sk-fresh: #7c9473;         /* 正常绿 */
+  --sk-fresh-bg: #edf1e8;
+  --sk-warn: #d4a55b;          /* 临期琥珀 */
+  --sk-warn-bg: #fbf1de;
+  --sk-danger: #c75d4d;        /* 即将过期砖红 */
+  --sk-danger-bg: #fae6e2;
+  --sk-expired: #9a8e80;       /* 已过期暖灰 */
+  --sk-expired-bg: #edeae5;
+
+  /* ===== Vant 主题变量覆写 ===== */
+  --van-primary-color: var(--sk-primary);
+  --van-success-color: var(--sk-primary);
+  --van-danger-color: var(--sk-danger);
+  --van-warning-color: var(--sk-warn);
+
+  --van-text-color: var(--sk-text);
+  --van-text-color-2: var(--sk-text-2);
+  --van-text-color-3: var(--sk-text-3);
+
+  --van-background: var(--sk-bg);
+  --van-background-2: var(--sk-card);
+
+  --van-border-color: var(--sk-border);
+  --van-active-color: var(--sk-primary-bg);
+
+  /* 导航栏 */
+  --van-nav-bar-background: var(--sk-card);
+  --van-nav-bar-title-text-color: var(--sk-text);
+  --van-nav-bar-icon-color: var(--sk-text-2);
+  --van-nav-bar-text-color: var(--sk-primary);
+
+  /* 底部 Tabbar */
+  --van-tabbar-background: var(--sk-card);
+  --van-tabbar-item-active-color: var(--sk-primary);
+  --van-tabbar-item-text-color: var(--sk-text-2);
+  --van-tabbar-item-icon-inactive-color: var(--sk-text-3);
+
+  /* 单元格 */
+  --van-cell-background: var(--sk-card);
+  --van-cell-text-color: var(--sk-text);
+  --van-cell-value-color: var(--sk-text-2);
+  --van-cell-border-color: var(--sk-border);
+
+  /* 标签 */
+  --van-tag-primary-color: var(--sk-primary);
+  --van-tag-danger-color: var(--sk-danger);
+  --van-tag-warning-color: var(--sk-warn);
+  --van-tag-success-color: var(--sk-primary);
+
+  /* 按钮 */
+  --van-button-primary-background: var(--sk-primary);
+  --van-button-primary-border-color: var(--sk-primary);
+  --van-button-danger-background: var(--sk-danger);
+  --van-button-danger-border-color: var(--sk-danger);
+  --van-button-warning-background: var(--sk-warn);
+  --van-button-warning-border-color: var(--sk-warn);
+  --van-button-default-background: var(--sk-card);
+  --van-button-default-border-color: var(--sk-border);
+  --van-button-default-text-color: var(--sk-text-2);
+  --van-button-round-border-radius: 999px;
+
+  /* 标签页 Tabs */
+  --van-tabs-bottom-bar-color: var(--sk-primary);
+  --van-tabs-active-text-color: var(--sk-primary);
+  --van-tabs-default-color: var(--sk-text-2);
+
+  /* 搜索 */
+  --van-search-background: var(--sk-bg);
+  --van-search-content-background: var(--sk-card);
+
+  /* 输入框 */
+  --van-field-label-color: var(--sk-text-2);
+  --van-field-input-text-color: var(--sk-text);
+  --van-field-placeholder-text-color: var(--sk-text-3);
+
+  /* 空状态 / 加载 */
+  --van-empty-description-color: var(--sk-text-3);
+  --van-loading-text-color: var(--sk-text-2);
+
+  /* 宫格 */
+  --van-grid-item-text-color: var(--sk-text-2);
+  --van-grid-item-content-background: var(--sk-card);
+
+  /* 弹层 */
+  --van-popup-background: var(--sk-card);
+  --van-popup-round-radius: 18px;
+
+  /* 选择器 */
+  --van-picker-background: var(--sk-card);
+  --van-picker-option-text-color: var(--sk-text);
+  --van-picker-confirm-action-color: var(--sk-primary);
+
+  /* 对话框 */
+  --van-dialog-background: var(--sk-card);
+  --van-dialog-header-color: var(--sk-text);
+  --van-dialog-confirm-button-text-color: var(--sk-primary);
+}
+
+/* ===== 全局基底 ===== */
+body {
+  background-color: var(--sk-bg);
+  color: var(--sk-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+/* 导航栏底色与细描边 */
+.van-nav-bar {
+  background: var(--sk-card);
+  border-bottom: 1px solid var(--sk-border);
+}
+.van-nav-bar__title {
+  font-weight: 600;
+}
+
+/* 底部 Tabbar 顶部细线 */
+.van-tabbar {
+  border-top: 1px solid var(--sk-border);
+}
+
+/* 单元格圆角容器（用于卡片化） */
+.van-cell-group {
+  background: transparent;
+}
+
+/* Tabs 激活字重 */
+.van-tab--active {
+  font-weight: 600;
+}
+
+/* 标签圆角更柔和 */
+.van-tag {
+  border-radius: 6px;
+}
+
+/* ===== 临期呼吸动画（用于 red 即将过期状态） ===== */
+@keyframes sk-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(199, 93, 77, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(199, 93, 77, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(199, 93, 77, 0);
+  }
+}
+
+.sk-status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+.sk-status-dot.danger {
+  background: var(--sk-danger);
+  animation: sk-pulse 1.6s infinite;
+}
+.sk-status-dot.warn {
+  background: var(--sk-warn);
+}
+.sk-status-dot.fresh {
+  background: var(--sk-fresh);
+}
+.sk-status-dot.expired {
+  background: var(--sk-expired);
+}
+
+/* ============================================================
+ * 紧凑食材卡（2 列网格，全局共享）
+ * 设计要点：不占满行、信息居中、主内容字号放大、关键元素强调
+ * 用于首页 / 库存 / 临期 / 报表 等所有食材卡片实例
+ * ========================================================== */
+.sk-food-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 0 4px;
+}
+
+.sk-food-card {
+  position: relative;
+  background: var(--sk-card);
+  border-radius: 14px;
+  padding: 14px 12px 12px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(61, 53, 46, 0.05);
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+
+.sk-food-card:active {
+  transform: scale(0.97);
+  box-shadow: 0 1px 4px rgba(61, 53, 46, 0.08);
+}
+
+/* 左侧分类色条（贯穿卡片高度） */
+.sk-food-card .sk-card-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+/* 顶部：状态点 + 剩余天数（居中、强调） */
+.sk-food-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 9px;
+  min-height: 18px;
+}
+
+.sk-food-days {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sk-text-2);
+  letter-spacing: 0.2px;
+}
+
+/* 主内容：食材名称（放大、居中、加粗强调） */
+.sk-food-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--sk-text);
+  line-height: 1.25;
+  margin-bottom: 9px;
+  word-break: break-all;
+}
+
+/* 底部：数量 · 分类（居中、次要） */
+.sk-food-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--sk-text-2);
+  flex-wrap: wrap;
+}
+
+.sk-food-qty {
+  font-weight: 700;
+  color: var(--sk-text);
+  font-size: 13px;
+}
+
+.sk-food-sep {
+  color: var(--sk-text-3);
+}
+
+.sk-food-cat {
+  font-size: 12px;
+  color: var(--sk-text-2);
+}
+
+/* 卡片内操作行（如过期报废按钮） */
+.sk-food-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+/* ===== 临期状态色覆盖（卡片底色 + 天数强调色） ===== */
+.sk-food-card.red {
+  background: var(--sk-danger-bg);
+}
+.sk-food-card.red .sk-food-days {
+  color: var(--sk-danger);
+}
+
+.sk-food-card.yellow {
+  background: var(--sk-warn-bg);
+}
+.sk-food-card.yellow .sk-food-days {
+  color: var(--sk-warn);
+}
+
+.sk-food-card.expired {
+  background: var(--sk-expired-bg);
+  opacity: 0.88;
+}
+.sk-food-card.expired .sk-food-days {
+  color: var(--sk-expired);
+}
+.sk-food-card.expired .sk-food-name {
+  color: var(--sk-text-2);
+}
+
+.sk-food-card.green,
+.sk-food-card.normal {
+  background: var(--sk-card);
+}
+.sk-food-card.green .sk-food-days,
+.sk-food-card.normal .sk-food-days {
+  color: var(--sk-primary);
+}
+

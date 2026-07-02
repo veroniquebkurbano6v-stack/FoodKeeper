@@ -1,0 +1,57 @@
+# 开发环境配置
+server:
+  port: 8080
+
+spring:
+  # 数据源配置（敏感信息使用环境变量）
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:food_inventory}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:123456}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      pool-name: FoodInventoryHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  # Redis 配置（敏感信息使用环境变量）
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+      timeout: 10000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1ms
+          max-idle: 8
+          min-idle: 0
+
+  # Jasypt 配置加密密钥（生产环境必须使用环境变量）
+  jasypt:
+    encryptor:
+      password: ${JASYPT_PASSWORD:dev-secret-key}
+
+# MyBatis-Plus 配置（开发环境打印SQL）
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# Knife4j 接口文档（开发环境启用）
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
+# 日志配置（开发环境详细日志）
+logging:
+  level:
+    root: INFO
+    com.food: DEBUG
+    com.food.mapper: DEBUG
+    org.springframework.web: DEBUG

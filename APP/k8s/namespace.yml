@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: food-inventory
+  labels:
+    name: food-inventory
+    environment: production
+  annotations:
+    # 资源配额
+    openshift.io/description: "食库管家生产环境命名空间"
+    openshift.io/display-name: "Food Inventory Production"
