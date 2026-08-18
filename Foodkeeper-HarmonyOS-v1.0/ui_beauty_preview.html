@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>食库管家 - 美化界面预览</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F8F6F1;
+      --surface: #FFFFFF;
+      --primary: #5A8F6E;
+      --primary-light: #E8F3EB;
+      --primary-gradient: linear-gradient(135deg, #6BA77E 0%, #4A7A5C 100%);
+      --accent: #F5A962;
+      --accent-light: #FFF2E2;
+      --danger: #E06C5F;
+      --danger-light: #FDEBE9;
+      --warn: #E8B84A;
+      --warn-light: #FCF5E3;
+      --text: #2C3E36;
+      --text2: #6B7B74;
+      --text3: #A5B2AC;
+      --border: #ECE9E2;
+      --shadow: 0 8px 24px rgba(44, 62, 54, 0.08);
+      --shadow-soft: 0 4px 16px rgba(44, 62, 54, 0.05);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #EDE9E2;
+      padding: 40px 24px;
+      color: var(--text);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .header h1 {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .header p {
+      font-size: 16px;
+      color: var(--text2);
+    }
+    .phones {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 40px;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+    .phone-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .phone-label {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 14px;
+      padding: 8px 20px;
+      background: var(--surface);
+      border-radius: 999px;
+      box-shadow: var(--shadow-soft);
+    }
+    .phone {
+      width: 360px;
+      height: 740px;
+      background: var(--bg);
+      border-radius: 44px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.18), inset 0 0 0 10px #FFFFFF;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .phone::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 160px;
+      height: 28px;
+      background: #FFFFFF;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      z-index: 10;
+    }
+    .screen {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 46px 18px 18px;
+    }
+    .screen::-webkit-scrollbar { display: none; }
+
+    /* Common */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 52px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      border-radius: 0 0 20px 20px;
+      margin: -46px -18px 16px;
+      padding: 0 20px;
+      position: relative;
+      z-index: 2;
+      box-shadow: var(--shadow-soft);
+    }
+    .nav-title { font-size: 17px; font-weight: 700; }
+    .nav-left, .nav-right { position: absolute; font-size: 20px; color: var(--text); cursor: pointer; }
+    .nav-left { left: 18px; }
+    .nav-right { right: 18px; font-size: 15px; color: var(--primary); font-weight: 700; }
+
+    .card {
+      background: var(--surface);
+      border-radius: 20px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+    }
+
+    /* Home */
+    .hero {
+      background: var(--primary-gradient);
+      border-radius: 24px;
+      padding: 22px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 16px;
+      box-shadow: 0 12px 28px rgba(90, 143, 110, 0.28);
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 140px;
+      height: 140px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 50%;
+    }
+    .hero-icon { font-size: 34px; margin-bottom: 6px; }
+    .hero h2 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+    .hero p { font-size: 13px; opacity: 0.88; }
+    .hero-deco {
+      position: absolute;
+      right: 18px;
+      top: 18px;
+      width: 54px;
+      height: 54px;
+      background: rgba(255,255,255,0.18);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .stat {
+      background: var(--surface);
+      border-radius: 18px;
+      padding: 14px 8px;
+      text-align: center;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+    .stat-label { font-size: 11px; color: var(--text2); }
+    .btn-primary {
+      width: 100%;
+      height: 48px;
+      border-radius: 999px;
+      background: var(--primary-gradient);
+      color: #fff;
+      border: none;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 20px rgba(90, 143, 110, 0.28);
+      cursor: pointer;
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .section-title a { font-size: 12px; color: var(--primary); font-weight: 500; text-decoration: none; }
+    .food-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .food-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 14px;
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--primary);
+    }
+    .food-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--warn);
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .food-info { flex: 1; }
+    .food-name { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+    .food-meta { font-size: 11px; color: var(--text2); }
+    .food-badge {
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--warn-light);
+      color: var(--warn);
+    }
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .quick {
+      background: var(--surface);
+      border-radius: 18px;
+      padding: 14px 6px;
+      text-align: center;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+    }
+    .quick-icon {
+      width: 34px;
+      height: 34px;
+      margin: 0 auto 8px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .quick-label { font-size: 10px; color: var(--text2); }
+    .tab-bar {
+      height: 64px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-radius: 20px 20px 0 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: 6px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.04);
+    }
+    .tab { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .tab-icon { font-size: 22px; }
+    .tab-label { font-size: 10px; }
+    .tab.active { color: var(--primary); }
+    .tab:not(.active) { color: var(--text3); }
+
+    /* Inventory */
+    .inv-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .inv-header h3 { font-size: 20px; font-weight: 800; }
+    .add-pill {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 7px 14px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .search {
+      display: flex;
+      align-items: center;
+      background: var(--surface);
+      border-radius: 999px;
+      padding: 10px 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+      color: var(--text3);
+      font-size: 14px;
+    }
+    .cat-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .cat-tabs::-webkit-scrollbar { display: none; }
+    .cat-tab {
+      flex-shrink: 0;
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text2);
+    }
+    .cat-tab.active { background: var(--primary-light); color: var(--primary); border-color: var(--primary-light); }
+    .sort-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 12px;
+      color: var(--text2);
+    }
+    .sort-chip {
+      padding: 5px 12px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 999px;
+      font-weight: 700;
+    }
+    .food-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .food-card {
+      background: var(--surface);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--primary);
+    }
+    .fc-status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .fc-status.warn { background: var(--warn-light); color: var(--warn); }
+    .fc-status.danger { background: var(--danger-light); color: var(--danger); }
+    .fc-name { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+    .fc-meta { font-size: 11px; color: var(--text2); }
+
+    /* Recipe */
+    .recipe-stats {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .r-stat {
+      padding: 5px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .r-stat.green { background: var(--primary-light); color: var(--primary); }
+    .r-stat.yellow { background: var(--warn-light); color: var(--warn); }
+    .r-stat.red { background: var(--danger-light); color: var(--danger); }
+    .recipe-card {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+    }
+    .rc-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .rc-name { font-size: 17px; font-weight: 800; }
+    .rc-rate {
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+    .rc-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .rc-tag {
+      padding: 3px 7px;
+      border-radius: 6px;
+      font-size: 10px;
+      background: #F3F3F3;
+      color: var(--text2);
+    }
+    .rc-ing {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .rc-ing span {
+      padding: 4px 9px;
+      border-radius: 8px;
+      font-size: 11px;
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    .rc-ing span.miss { background: var(--accent-light); color: var(--accent); }
+
+    /* Add Food */
+    .field {
+      margin-bottom: 14px;
+    }
+    .field-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text2);
+      margin-bottom: 7px;
+    }
+    .input {
+      width: 100%;
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 14px;
+      color: var(--text);
+      box-shadow: var(--shadow-soft);
+    }
+    .option-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .option {
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      box-shadow: var(--shadow-soft);
+    }
+    .option.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .zone-row { display: flex; gap: 10px; }
+    .zone {
+      flex: 1;
+      text-align: center;
+      padding: 14px 8px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+    }
+    .zone.active { background: var(--primary-light); border-color: var(--primary); }
+    .zone-icon { font-size: 22px; margin-bottom: 4px; }
+    .zone-label { font-size: 11px; color: var(--text2); }
+    .date-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 14px;
+      background: var(--surface);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+    }
+    .date-label { font-size: 14px; color: var(--text); }
+    .date-action { font-size: 13px; color: var(--primary); font-weight: 700; }
+    .expiry-hint { font-size: 11px; color: var(--text3); margin-top: 6px; }
+    .btn-danger {
+      width: 100%;
+      height: 48px;
+      border-radius: 999px;
+      background: var(--danger-light);
+      color: var(--danger);
+      border: none;
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>食库管家 · 界面美化预览</h1>
+    <p>布局保持原有结构，优化配色、圆角、阴影与图标风格</p>
+  </div>
+
+  <div class="phones">
+    <!-- 首页 -->
+    <div class="phone-wrap">
+      <div class="phone-label">首页 Home</div>
+      <div class="phone">
+        <div class="screen">
+          <div class="nav-bar"><div class="nav-title">食库管家</div></div>
+
+          <div class="hero">
+            <div class="hero-icon">🥬</div>
+            <h2>食库管家</h2>
+            <p>让食材管理更简单</p>
+            <div class="hero-deco">❄</div>
+          </div>
+
+          <div class="stats">
+            <div class="stat"><div class="stat-value" style="color:var(--primary)">8</div><div class="stat-label">食材品类</div></div>
+            <div class="stat"><div class="stat-value" style="color:var(--warn)">3</div><div class="stat-label">临期预警</div></div>
+            <div class="stat"><div class="stat-value" style="color:var(--danger)">1</div><div class="stat-label">已过期</div></div>
+          </div>
+
+          <button class="btn-primary">+ 新增食材入库</button>
+
+          <div class="section-title">⚠ 临期提醒 <a href="#">查看全部</a></div>
+          <div class="food-row">
+            <div class="food-item">
+              <div class="food-dot"></div>
+              <div class="food-info"><div class="food-name">生菜</div><div class="food-meta">2 把 · 蔬菜</div></div>
+              <div class="food-badge">剩 1 天</div>
+            </div>
+            <div class="food-item">
+              <div class="food-dot" style="background:var(--warn)"></div>
+              <div class="food-info"><div class="food-name">番茄</div><div class="food-meta">5 个 · 蔬菜</div></div>
+              <div class="food-badge">剩 2 天</div>
+            </div>
+          </div>
+
+          <div class="section-title">快捷操作</div>
+          <div class="quick-grid">
+            <div class="quick"><div class="quick-icon" style="background:#EDF1E8">📦</div><div class="quick-label">库存管理</div></div>
+            <div class="quick"><div class="quick-icon" style="background:#E8EEF4">⬇</div><div class="quick-label">食材出库</div></div>
+            <div class="quick"><div class="quick-icon" style="background:#F7E8DF">🍳</div><div class="quick-label">AI菜谱</div></div>
+            <div class="quick"><div class="quick-icon" style="background:#F5E6E2">📊</div><div class="quick-label">数据报表</div></div>
+            <div class="quick"><div class="quick-icon" style="background:#FBF1DE">⏰</div><div class="quick-label">临期汇总</div></div>
+            <div class="quick"><div class="quick-icon" style="background:#EDEAE5">📝</div><div class="quick-label">出库日志</div></div>
+            <div class="quick"><div class="quick-icon" style="background:#F0E2DC">👤</div><div class="quick-label">口味偏好</div></div>
+            <div class="quick"><div class="quick-icon" style="background:#E9EEF1">⚙</div><div class="quick-label">系统设置</div></div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab active"><div class="tab-icon">🏠</div><div class="tab-label">首页</div></div>
+          <div class="tab"><div class="tab-icon">📦</div><div class="tab-label">库存</div></div>
+          <div class="tab"><div class="tab-icon">🍳</div><div class="tab-label">AI菜谱</div></div>
+          <div class="tab"><div class="tab-icon">👤</div><div class="tab-label">我的</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 库存页 -->
+    <div class="phone-wrap">
+      <div class="phone-label">库存清单 Inventory</div>
+      <div class="phone">
+        <div class="screen">
+          <div class="nav-bar">
+            <div class="nav-title">库存清单</div>
+            <div class="nav-right">+ 新增</div>
+          </div>
+
+          <div class="search">🔍 搜索食材名称</div>
+
+          <div class="cat-tabs">
+            <div class="cat-tab active">全部 12</div>
+            <div class="cat-tab">蔬菜</div>
+            <div class="cat-tab">肉类</div>
+            <div class="cat-tab">海鲜</div>
+            <div class="cat-tab">干货</div>
+            <div class="cat-tab">水果</div>
+          </div>
+
+          <div class="sort-bar"><span class="sort-chip">按保质期排序</span><span>共 12 项</span></div>
+
+          <div class="food-grid">
+            <div class="food-card" style="border-top-color:#7C9473">
+              <div class="fc-status danger">剩 1 天</div>
+              <div class="fc-name">生菜</div>
+              <div class="fc-meta">2 把 · 蔬菜 · 冷藏</div>
+            </div>
+            <div class="food-card" style="border-top-color:#7C9473">
+              <div class="fc-status warn">剩 2 天</div>
+              <div class="fc-name">番茄</div>
+              <div class="fc-meta">5 个 · 蔬菜 · 冷藏</div>
+            </div>
+            <div class="food-card" style="border-top-color:#C97B6E">
+              <div class="fc-status warn">剩 3 天</div>
+              <div class="fc-name">牛肉</div>
+              <div class="fc-meta">300 克 · 肉类 · 冷冻</div>
+            </div>
+            <div class="food-card" style="border-top-color:#6E8CA8">
+              <div class="fc-status" style="background:#E8F3EB;color:var(--primary)">剩 7 天</div>
+              <div class="fc-name">虾仁</div>
+              <div class="fc-meta">200 克 · 海鲜 · 冷冻</div>
+            </div>
+            <div class="food-card" style="border-top-color:#A88B6A">
+              <div class="fc-status" style="background:#E8F3EB;color:var(--primary)">剩 90 天</div>
+              <div class="fc-name">大米</div>
+              <div class="fc-meta">5 公斤 · 干货 · 常温</div>
+            </div>
+            <div class="food-card" style="border-top-color:#C75D4D">
+              <div class="fc-status" style="background:#E8F3EB;color:var(--primary)">剩 10 天</div>
+              <div class="fc-name">苹果</div>
+              <div class="fc-meta">6 个 · 水果 · 常温</div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab"><div class="tab-icon">🏠</div><div class="tab-label">首页</div></div>
+          <div class="tab active"><div class="tab-icon">📦</div><div class="tab-label">库存</div></div>
+          <div class="tab"><div class="tab-icon">🍳</div><div class="tab-label">AI菜谱</div></div>
+          <div class="tab"><div class="tab-icon">👤</div><div class="tab-label">我的</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI 菜谱页 -->
+    <div class="phone-wrap">
+      <div class="phone-label">AI 菜谱 Recipe</div>
+      <div class="phone">
+        <div class="screen">
+          <div class="nav-bar"><div class="nav-title">AI 菜谱推荐</div></div>
+
+          <div class="recipe-stats">
+            <div class="r-stat green">可用 12</div>
+            <div class="r-stat yellow">临期 3</div>
+            <div class="r-stat red">已过期 1</div>
+          </div>
+
+          <button class="btn-primary" style="margin-bottom:14px">🔄 重新生成食谱</button>
+
+          <div class="cat-tabs" style="margin-bottom:14px">
+            <div class="cat-tab active">全部</div>
+            <div class="cat-tab">快手懒人餐</div>
+            <div class="cat-tab">减脂轻食餐</div>
+            <div class="cat-tab">家常正餐</div>
+            <div class="cat-tab">我的菜谱</div>
+          </div>
+
+          <div class="recipe-card">
+            <div class="rc-head"><div class="rc-name">番茄炒蛋</div><div class="rc-rate">已备 5/5</div></div>
+            <div class="rc-tags"><span class="rc-tag">⏱ 15分钟</span><span class="rc-tag">🔥 180千卡</span><span class="rc-tag">📊 简单</span></div>
+            <div class="rc-ing">
+              <span>番茄 2个</span>
+              <span>鸡蛋 3个</span>
+              <span>葱 1把</span>
+              <span class="miss">盐 适量</span>
+            </div>
+          </div>
+
+          <div class="recipe-card" style="border-left-color:var(--primary)">
+            <div class="rc-head"><div class="rc-name">生菜牛肉沙拉</div><div class="rc-rate" style="background:var(--warn-light);color:var(--warn)">已备 3/5</div></div>
+            <div class="rc-tags"><span class="rc-tag">⏱ 20分钟</span><span class="rc-tag">🔥 320千卡</span><span class="rc-tag">📊 中等</span><span class="rc-tag" style="background:var(--danger-light);color:var(--danger)">⚠ 含临期食材</span></div>
+            <div class="rc-ing">
+              <span>生菜 1把</span>
+              <span>牛肉 150g</span>
+              <span class="miss">橄榄油 适量</span>
+              <span class="miss">黑胡椒 适量</span>
+            </div>
+          </div>
+
+          <div class="recipe-card" style="border-left-color:#6E8CA8">
+            <div class="rc-head"><div class="rc-name">虾仁蒸蛋</div><div class="rc-rate" style="background:var(--warn-light);color:var(--warn)">已备 4/6</div></div>
+            <div class="rc-tags"><span class="rc-tag">⏱ 25分钟</span><span class="rc-tag">🔥 220千卡</span><span class="rc-tag">📊 简单</span></div>
+            <div class="rc-ing">
+              <span>虾仁 100g</span>
+              <span>鸡蛋 2个</span>
+              <span>温水 适量</span>
+              <span class="miss">生抽 适量</span>
+            </div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab"><div class="tab-icon">🏠</div><div class="tab-label">首页</div></div>
+          <div class="tab"><div class="tab-icon">📦</div><div class="tab-label">库存</div></div>
+          <div class="tab active"><div class="tab-icon">🍳</div><div class="tab-label">AI菜谱</div></div>
+          <div class="tab"><div class="tab-icon">👤</div><div class="tab-label">我的</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 新增食材页 -->
+    <div class="phone-wrap">
+      <div class="phone-label">新增食材 AddFood</div>
+      <div class="phone">
+        <div class="screen">
+          <div class="nav-bar">
+            <div class="nav-left">←</div>
+            <div class="nav-title">新增食材</div>
+            <div class="nav-right">保存</div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">食材名称</div>
+            <div class="input">番茄</div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">分类</div>
+            <div class="option-row">
+              <div class="option active">蔬菜</div>
+              <div class="option">肉类</div>
+              <div class="option">海鲜</div>
+              <div class="option">干货</div>
+              <div class="option">水果</div>
+              <div class="option">调料</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">数量</div>
+            <div style="display:flex;gap:10px">
+              <div class="input" style="flex:1">5</div>
+              <div class="option active">个</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">存储分区</div>
+            <div class="zone-row">
+              <div class="zone active"><div class="zone-icon">❄</div><div class="zone-label">冷藏室</div></div>
+              <div class="zone"><div class="zone-icon">🧊</div><div class="zone-label">冷冻层</div></div>
+              <div class="zone"><div class="zone-icon">🌡</div><div class="zone-label">常温</div></div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">单价（元）</div>
+            <div class="input">3.50</div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">总价（元）</div>
+            <div class="input">17.50</div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">购买日期</div>
+            <div class="date-row"><span class="date-label">2026-07-18</span><span class="date-action">选择</span></div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">保质期天数</div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <div class="input" style="flex:1">7</div>
+              <span class="expiry-hint">到期日：2026-07-25</span>
+            </div>
+          </div>
+
+          <button class="btn-primary" style="margin-top:10px">添加入库</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

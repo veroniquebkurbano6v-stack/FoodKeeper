@@ -1,0 +1,56 @@
+{
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "C:\\Users\\H1314\\.ohos\\config\\default_Foodkeeper_KwM1xmT7eCaoGu1P7v-j5W5OtfbSqbdMeQP9Gmso0uM=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001B7D9EA49D780D46DBC11B96606FD2525C4D197D27F12D5A099195596402CF5937782EADC7C07B06",
+          "profile": "C:\\Users\\H1314\\.ohos\\config\\default_Foodkeeper_KwM1xmT7eCaoGu1P7v-j5W5OtfbSqbdMeQP9Gmso0uM=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:\\Users\\H1314\\.ohos\\config\\default_Foodkeeper_KwM1xmT7eCaoGu1P7v-j5W5OtfbSqbdMeQP9Gmso0uM=.p12",
+          "storePassword": "0000001B0E291132BBCA7E5573E410B9291DDF613D649F36E2CA090C19EC85568F88E07835EAC4567FB544"
+        }
+      }
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "default",
+        "targetSdkVersion": "6.1.1(24)",
+        "compatibleSdkVersion": "6.0.0(20)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          }
+        }
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug",
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ]
+}
