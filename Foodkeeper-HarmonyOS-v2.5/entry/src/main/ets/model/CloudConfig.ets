@@ -21,7 +21,8 @@ export const BAIDU_INGREDIENT_URL: string = 'https://aip.baidubce.com/rest/2.0/i
 export const BAIDU_GENERAL_URL: string = 'https://aip.baidubce.com/rest/2.0/image-classify/v2/advanced_general';
 
 // 端侧检测置信度阈值（低于则丢弃该帧，不上传不标注）
-export const DETECT_CONF_THRESHOLD: number = 0.7;
+// 采用 YOLO 惯例 0.25：COCO 预训练模型对食材类多为弱检出，0.7 会让食材几乎永远不出框。
+export const DETECT_CONF_THRESHOLD: number = 0.25;
 // 云端果蔬识别置信度阈值（低于则降级到通用物体识别）
 export const INGREDIENT_CONF_THRESHOLD: number = 0.5;
 

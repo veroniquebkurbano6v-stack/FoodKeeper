@@ -9,7 +9,11 @@
 import mindSporeLite from '@ohos.ai.mindSporeLite';
 import image from '@ohos.multimedia.image';
 import { common } from '@kit.AbilityKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
 import { LOCAL_MODEL_NAME, DETECT_CONF_THRESHOLD } from '../model/CloudConfig';
+
+const DOMAIN = 0x0001;
+const TAG = 'LocalDetector';
 
 // 归一化检测框（相对值 0-1）
 export interface Detection {
@@ -28,6 +32,8 @@ export interface DetectResult {
 // YOLOv8n 输入边长与 COCO 类别数
 const MODEL_INPUT_SIZE: number = 640;
 const NUM_CLASSES: number = 80;
+// YOLOv8n 每输出锚点数 = 3 个检测头(8/16/32 下采样) anchor 数之和：640*640*(1/64 + 1/256 + 1/1024)=8400
+const NUM_ANCHORS: number = 8400;
 
 export class LocalDetector {
   private static instance: LocalDetector | null = null;
@@ -48,9 +54,13 @@ export class LocalDetector {
       const buffer = raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength) as ArrayBuffer;
       this.model = await mindSporeLite.loadModelFromBuffer(buffer);
       this.available = true;
+      hilog.info(DOMAIN, TAG, 'yolov8n.ms loaded ok');
     } catch (e) {
       this.available = false;
       this.model = null;
+      // 打印加载失败原因（如模型版本与设备 MindSpore Lite runtime 不匹配等），
+      // 便于在 DevEco Log / hilog 中定位。
+      hilog.error(DOMAIN, TAG, 'load model failed, msg=%{public}s', JSON.stringify(e));
     }
   }
 
@@ -78,13 +88,16 @@ export class LocalDetector {
   }
 
   // 图像 → 模型输入（640×640 RGB 归一化，NCHW Float32）
+  // 用区域缩放产生新副本，而非原地缩放 src，避免污染调用方传入的源图
+  // （源图后续还需用于按检测框裁剪主体并上传云端）。
   private async preprocess(src: image.PixelMap): Promise<ArrayBuffer> {
     const info = await src.getImageInfo();
-    const ratioX = MODEL_INPUT_SIZE / info.size.width;
-    const ratioY = MODEL_INPUT_SIZE / info.size.height;
-    if (ratioX !== 1 || ratioY !== 1) {
-      await src.scale(ratioX, ratioY); // 原地缩放到模型输入尺寸
-    }
+    const region: image.Region = {
+      x: 0,
+      y: 0,
+      size: { width: info.size.width, height: info.size.height }
+    };
+    const scaled = await src.createCroppedAndScaledPixelMap(region, MODEL_INPUT_SIZE, MODEL_INPUT_SIZE);
     const pixelBuffer = new ArrayBuffer(MODEL_INPUT_SIZE * MODEL_INPUT_SIZE * 4);
     const area: image.PositionArea = {
       pixels: pixelBuffer,
@@ -92,7 +105,8 @@ export class LocalDetector {
       stride: MODEL_INPUT_SIZE * 4,
       region: { x: 0, y: 0, size: { width: MODEL_INPUT_SIZE, height: MODEL_INPUT_SIZE } }
     };
-    await src.readPixels(area);
+    await scaled.readPixels(area);
+    scaled.release();
     const rgba = new Uint8Array(pixelBuffer);
     const planeSize = MODEL_INPUT_SIZE * MODEL_INPUT_SIZE;
     const input = new Float32Array(3 * planeSize);
@@ -104,35 +118,38 @@ export class LocalDetector {
     return input.buffer;
   }
 
-  // 后处理：YOLOv8 输出 [1, 4+CLASSES, anchors]，取全局最高类别置信度的框并归一化。
-  // 说明：具体输出形状以后 concerto 转换得到的 .ms 模型为准，此处按标准 YOLOv8 NCHW 输出解析。
+  // 后处理：模型输出 [1, 4+NUM_CLASSES, NUM_ANCHORS]，channel-major（每个 channel 一行 8400 个锚点）。
+  //   - 前 4 个 channel：cx、cy、w、h（单位：像素，相对模型输入 640×640）
+  //   - 其后 80 个 channel：各类别 logits（需 sigmoid 得置信度）
+  // 按全局最高置信度取单框并归一化到 [0,1]。
   private postprocess(outputs: mindSporeLite.MSTensor[]): Detection[] {
     if (outputs.length === 0) return [];
     const data = outputs[0].getData();
     if (data.byteLength === 0) return [];
     const arr = new Float32Array(data);
     const stride = 4 + NUM_CLASSES;
-    const numBoxes = Math.floor(arr.length / stride);
-    let bestBox = -1;
+    const numAnchors = NUM_ANCHORS;
+    if (arr.length < stride * numAnchors) return [];
+
+    let bestAnchor = -1;
     let bestConf = 0;
-    for (let i = 0; i < numBoxes; i++) {
-      const base = i * stride;
+    for (let i = 0; i < numAnchors; i++) {
       for (let c = 0; c < NUM_CLASSES; c++) {
-        const conf = arr[base + 4 + c];
+        // sigmoid 将 logits 映射到 [0,1]
+        const conf = 1 / (1 + Math.exp(-arr[(4 + c) * numAnchors + i]));
         if (conf > bestConf) {
           bestConf = conf;
-          bestBox = i;
+          bestAnchor = i;
         }
       }
     }
-    if (bestBox < 0 || bestConf < DETECT_CONF_THRESHOLD) {
+    if (bestAnchor < 0 || bestConf < DETECT_CONF_THRESHOLD) {
       return [];
     }
-    const base = bestBox * stride;
-    const cx = arr[base] / MODEL_INPUT_SIZE;
-    const cy = arr[base + 1] / MODEL_INPUT_SIZE;
-    const w = arr[base + 2] / MODEL_INPUT_SIZE;
-    const h = arr[base + 3] / MODEL_INPUT_SIZE;
+    const cx = arr[bestAnchor] / MODEL_INPUT_SIZE;
+    const cy = arr[1 * numAnchors + bestAnchor] / MODEL_INPUT_SIZE;
+    const w = arr[2 * numAnchors + bestAnchor] / MODEL_INPUT_SIZE;
+    const h = arr[3 * numAnchors + bestAnchor] / MODEL_INPUT_SIZE;
     const det: Detection = {
       left: cx - w / 2,
       top: cy - h / 2,
