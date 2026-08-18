@@ -1,0 +1,20 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "食库管家"
+    },
+    {
+      "name": "camera_permission_reason",
+      "value": "用于拍照识别食材，实现食材快速入库"
+    }
+  ]
+}

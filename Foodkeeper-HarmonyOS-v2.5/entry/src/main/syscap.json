@@ -1,0 +1,7 @@
+{
+  "devices": {
+    "general": [
+      "SystemCapability.AI.MindSporeLite"
+    ]
+  }
+}

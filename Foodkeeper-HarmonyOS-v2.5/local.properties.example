@@ -1,0 +1,44 @@
+# ============================================================
+# local.properties.example — 本机环境配置模板（含使用说明）
+# ------------------------------------------------------------
+# 这是模板。把本文件复制/改名为 local.properties 后按你的机器填写。
+# local.properties 已被 .gitignore 排除，不会提交，只属于你本机。
+# 作用：存放 <机器环境相关> 的 SDK 路径；项目逻辑请放 build-profile.json5。
+#
+# ── 用法 ────────────────────────────────────────────────────
+# 1) 命令行编译需要设置 SDK 环境变量：
+#    export DEVECO_SDK_HOME="D:/DevEco Studio/sdk"
+#    (Windows 永久生效: setx DEVECO_SDK_HOME "D:\DevEco Studio\sdk")
+#    或使用下方 sdk.dir（二选一，推荐环境变量）。
+# 2) 签名：本工程已剥离签名配置，默认编译未签名 HAP。
+#    需要签名时在 DevEco Studio → File → Project Structure →
+#    Signing Configs 勾选自动生成，材料写入你本机 ~/.ohos/config，
+#    勿把签名绝对路径写进要提交的 build-profile.json5。
+# 3) 编译 debug HAP：
+#    "D:/DevEco Studio/tools/hvigor/bin/hvigorw.bat" assembleHap \
+#      --mode module -p product=default -p buildMode=debug
+#    产物: entry/build/default/outputs/default/entry-default-unsigned.hap
+# ────────────────────────────────────────────────────────────
+#
+# 参考值（按需修改）：
+# sdk.dir=D\:\\DevEco Studio\\sdk
+# ============================================================
+# ── 百度 AI 开放平台配置（云端食材识别）────────────────────
+# 本工程自带「拍照识别食材」端云协同功能：端侧可用 YOLOv8n 检测框，
+# 云端用百度「果蔬识别 + 通用物体识别」降级链做精细分类。
+# 启用云端识别需要百度智能云凭证，配置方式如下：
+#
+# 1) 申请凭证：
+#    登录 https://ai.baidu.com → 图像识别 → 果蔬识别 / 通用物体和场景识别
+#    → 创建应用，得到 API Key 与 Secret Key。
+# 2) 填入代码常量：
+#    把 API Key / Secret Key 复制到
+#      entry/src/main/ets/model/CloudConfig.ets
+#    顶部的 BAIDU_API_KEY / BAIDU_SECRET_KEY 常量。
+#    （ArkTS 运行时无法直接读取本文件，故需复制进 CloudConfig.ets；
+#      本字段建议仅填入 local.properties 作本机记录。）
+# 3) 字段参考：
+#    baidu.api-key=<你的 API Key>
+#    baidu.secret-key=<你的 Secret Key>
+# 4) 安全提醒：请勿把真实密钥提交到公开仓库，以免额度被盗刷。
+# ────────────────────────────────────────────────────────────

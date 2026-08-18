@@ -1,0 +1,59 @@
+// ============================================================
+// build-profile.json5.example — 项目级配置模板
+// ------------------------------------------------------------
+// 这是 "干净模板"，用途：
+//   1. 供新机器/新成员复制：改名成 build-profile.json5 即可开始编译；
+//   2. 作为 "配置字典"，注释标注每个字段是【项目级】还是【环境级】。
+//
+// 关键原则（配置分层）：
+//   【项目级】targetSdk / compatibleSdk / buildMode / products…… → 提交到仓库
+//   【环境级】签名材料路径(.p12/.cer/.p7b)、SDK 路径          → 绝不写死在这里
+//
+// 签名：本项目已彻底剥离签名配置，默认编译出未签名 HAP。
+//       需要签名时，请在 DevEco Studio 的
+//       File → Project Structure → Signing Configs 勾选自动生成，
+//       由 IDE 把材料写进本机的 ~/.ohos/config，这里只记名字、不记绝对路径。
+// ============================================================
+{
+  "app": {
+    "products": [
+      {
+        "name": "default",
+        // 【项目级】目标/兼容 SDK 版本
+        "targetSdkVersion": "6.1.1(24)",
+        "compatibleSdkVersion": "6.0.0(20)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          }
+        }
+        // 【环境级-不要填死】如需签名，由 IDE 在 Signing Configs 自动生成并只记名字：
+        // "signingConfig": "default"
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug"
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ]
+}
