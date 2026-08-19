@@ -9,6 +9,7 @@
 import mindSporeLite from '@ohos.ai.mindSporeLite';
 import image from '@ohos.multimedia.image';
 import { common } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { LOCAL_MODEL_NAME, DETECT_CONF_THRESHOLD } from '../model/CloudConfig';
 
@@ -39,6 +40,12 @@ export class LocalDetector {
   private static instance: LocalDetector | null = null;
   private model: mindSporeLite.Model | null = null;
   private available: boolean = false;
+  // letterbox 映射参数：模型 640×640 坐标 ↔ 原始帧坐标 的换算依据
+  private origW: number = 1;
+  private origH: number = 1;
+  private scale: number = 1;      // 原始帧 → 640 画布的等比缩放系数
+  private padX: number = 0;       // 640 画布上水平居中偏移
+  private padY: number = 0;       // 640 画布上垂直居中偏移
 
   static getInstance(): LocalDetector {
     if (LocalDetector.instance === null) {
@@ -76,6 +83,7 @@ export class LocalDetector {
     try {
       const inputs = this.model.getInputs();
       if (inputs.length === 0) {
+        hilog.warn(DOMAIN, TAG, 'detect: model has no inputs');
         return { available: true, detections: [] };
       }
       const inputBuffer = await this.preprocess(src);
@@ -83,37 +91,62 @@ export class LocalDetector {
       const outputs = await this.model.predict(inputs);
       return { available: true, detections: this.postprocess(outputs) };
     } catch (e) {
+      // JSON.stringify(BusinessError) 可能是 {}，改用 code/message 输出以定位
+      const ec = (e && typeof (e as BusinessError).code === 'number') ? String((e as BusinessError).code) : 'n/a';
+      const em = (e && typeof (e as BusinessError).message === 'string') ? (e as BusinessError).message : JSON.stringify(e);
+      hilog.error(DOMAIN, TAG, 'detect failed: code=%{public}s msg=%{public}s', ec, em);
       return { available: false, detections: [] };
     }
   }
 
-  // 图像 → 模型输入（640×640 RGB 归一化，NCHW Float32）
-  // 用区域缩放产生新副本，而非原地缩放 src，避免污染调用方传入的源图
-  // （源图后续还需用于按检测框裁剪主体并上传云端）。
+  // 图像 → 模型输入（640×640 RGB 归一化，NCHW Float32）。
+  // 采用 letterbox：等比缩放并居中放入 640 画布、四周灰边，避免拉伸扭曲宽高比，
+  // 并记录 scale/pad 供 postprocess 把模型坐标还原回原始帧坐标。
   private async preprocess(src: image.PixelMap): Promise<ArrayBuffer> {
     const info = await src.getImageInfo();
-    const region: image.Region = {
-      x: 0,
-      y: 0,
-      size: { width: info.size.width, height: info.size.height }
-    };
-    const scaled = await src.createCroppedAndScaledPixelMap(region, MODEL_INPUT_SIZE, MODEL_INPUT_SIZE);
-    const pixelBuffer = new ArrayBuffer(MODEL_INPUT_SIZE * MODEL_INPUT_SIZE * 4);
-    const area: image.PositionArea = {
-      pixels: pixelBuffer,
+    this.origW = info.size.width;
+    this.origH = info.size.height;
+    // 等比缩放系数（保持宽高比）
+    const scale = Math.min(MODEL_INPUT_SIZE / this.origW, MODEL_INPUT_SIZE / this.origH);
+    this.scale = scale;
+    const newW = Math.round(this.origW * scale);
+    const newH = Math.round(this.origH * scale);
+    // 640 画布上居中偏移
+    this.padX = Math.round((MODEL_INPUT_SIZE - newW) / 2);
+    this.padY = Math.round((MODEL_INPUT_SIZE - newH) / 2);
+
+    // 等比缩放到目标尺寸
+    if (scale !== 1) {
+      await src.scale(newW / this.origW, newH / this.origH);
+    }
+    const scaledBuffer = new ArrayBuffer(newW * newH * 4);
+    await src.readPixels({
+      pixels: scaledBuffer,
       offset: 0,
-      stride: MODEL_INPUT_SIZE * 4,
-      region: { x: 0, y: 0, size: { width: MODEL_INPUT_SIZE, height: MODEL_INPUT_SIZE } }
-    };
-    await scaled.readPixels(area);
-    scaled.release();
-    const rgba = new Uint8Array(pixelBuffer);
-    const planeSize = MODEL_INPUT_SIZE * MODEL_INPUT_SIZE;
-    const input = new Float32Array(3 * planeSize);
-    for (let i = 0; i < planeSize; i++) {
-      input[i] = rgba[i * 4] / 255.0;                 // R
-      input[planeSize + i] = rgba[i * 4 + 1] / 255.0; // G
-      input[2 * planeSize + i] = rgba[i * 4 + 2] / 255.0; // B
+      stride: newW * 4,
+      region: { x: 0, y: 0, size: { width: newW, height: newH } }
+    });
+    const rgba = new Uint8Array(scaledBuffer);
+
+    // 拷贝到 640×640 画布并归一化为 NCHW Float32（灰边=114 / 255 ≈ 0.447）
+    const input = new Float32Array(3 * MODEL_INPUT_SIZE * MODEL_INPUT_SIZE);
+    const padVal = 114 / 255.0;
+    for (let y = 0; y < MODEL_INPUT_SIZE; y++) {
+      for (let x = 0; x < MODEL_INPUT_SIZE; x++) {
+        const sy = y - this.padY;
+        const sx = x - this.padX;
+        let r = padVal, g = padVal, b = padVal;
+        if (sy >= 0 && sy < newH && sx >= 0 && sx < newW) {
+          const idx = (sy * newW + sx) * 4;
+          r = rgba[idx] / 255.0;
+          g = rgba[idx + 1] / 255.0;
+          b = rgba[idx + 2] / 255.0;
+        }
+        const oi = y * MODEL_INPUT_SIZE + x;
+        input[oi] = r;
+        input[MODEL_INPUT_SIZE * MODEL_INPUT_SIZE + oi] = g;
+        input[2 * MODEL_INPUT_SIZE * MODEL_INPUT_SIZE + oi] = b;
+      }
     }
     return input.buffer;
   }
@@ -121,7 +154,7 @@ export class LocalDetector {
   // 后处理：模型输出 [1, 4+NUM_CLASSES, NUM_ANCHORS]，channel-major（每个 channel 一行 8400 个锚点）。
   //   - 前 4 个 channel：cx、cy、w、h（单位：像素，相对模型输入 640×640）
   //   - 其后 80 个 channel：各类别 logits（需 sigmoid 得置信度）
-  // 按全局最高置信度取单框并归一化到 [0,1]。
+  // 按全局最高置信度取单框，并用 preprocess 记录的 letterbox 参数还原到原始帧坐标（返回归一化 [0,1]）。
   private postprocess(outputs: mindSporeLite.MSTensor[]): Detection[] {
     if (outputs.length === 0) return [];
     const data = outputs[0].getData();
@@ -146,17 +179,43 @@ export class LocalDetector {
     if (bestAnchor < 0 || bestConf < DETECT_CONF_THRESHOLD) {
       return [];
     }
-    const cx = arr[bestAnchor] / MODEL_INPUT_SIZE;
-    const cy = arr[1 * numAnchors + bestAnchor] / MODEL_INPUT_SIZE;
-    const w = arr[2 * numAnchors + bestAnchor] / MODEL_INPUT_SIZE;
-    const h = arr[3 * numAnchors + bestAnchor] / MODEL_INPUT_SIZE;
+    // 模型 640 系坐标（像素）
+    const modelCx = arr[bestAnchor];
+    const modelCy = arr[1 * numAnchors + bestAnchor];
+    const modelW = arr[2 * numAnchors + bestAnchor];
+    const modelH = arr[3 * numAnchors + bestAnchor];
+    // 还原到原始帧像素坐标：orig = (model - pad) / scale
+    const ox = (modelCx - this.padX) / this.scale;
+    const oy = (modelCy - this.padY) / this.scale;
+    const ow = modelW / this.scale;
+    const oh = modelH / this.scale;
     const det: Detection = {
-      left: cx - w / 2,
-      top: cy - h / 2,
-      width: w,
-      height: h,
+      left: (ox - ow / 2) / this.origW,
+      top: (oy - oh / 2) / this.origH,
+      width: ow / this.origW,
+      height: oh / this.origH,
       confidence: bestConf
     };
-    return [det];
+    // 越界防护：框内坐标夹取到 [0,1]，避免百分比越界盖到画面外（如下方按钮区）
+    const clamped = this.clampToUnit(det);
+    hilog.info(DOMAIN, TAG, 'det: l=%{public}s t=%{public}s w=%{public}s h=%{public}s c=%{public}s',
+      clamped.left.toFixed(3), clamped.top.toFixed(3), clamped.width.toFixed(3), clamped.height.toFixed(3),
+      clamped.confidence.toFixed(3));
+    return [clamped];
+  }
+
+  // 把归一化矩形限制在 [0,1] 内（并裁剪超出部分），杜绝越界渲染
+  private clampToUnit(d: Detection): Detection {
+    const left = Math.min(1.0, Math.max(0.0, d.left));
+    const top = Math.min(1.0, Math.max(0.0, d.top));
+    const right = Math.min(1.0, Math.max(0.0, d.left + d.width));
+    const bottom = Math.min(1.0, Math.max(0.0, d.top + d.height));
+    return {
+      left: left,
+      top: top,
+      width: Math.max(0.0, right - left),
+      height: Math.max(0.0, bottom - top),
+      confidence: d.confidence
+    };
   }
 }
